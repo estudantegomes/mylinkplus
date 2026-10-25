@@ -1,0 +1,85 @@
+<style>
+    body:has(.mylink-login) { margin-top: 0; background: #f5f5f5; }
+    main:has(.mylink-login) > header { display: none; }
+    .mylink-login { --ml-blue: #507cf3; --ml-ink: #171717; min-height: 100vh; min-height: 100dvh; color: var(--ml-ink); }
+    .mylink-login .login-card { width: 100%; max-width: 440px; border-radius: 24px; box-shadow: 0 12px 48px rgba(25, 45, 85, .07); }
+    .mylink-login .brand { font-size: 2.65rem; font-weight: 750; letter-spacing: -2px; line-height: 1.2; }
+    .mylink-login .brand-blue { color: var(--ml-blue); }
+    .mylink-login .brand-icon { font-size: 2.1rem; letter-spacing: 0; position: relative; }
+    .mylink-login .brand-plus { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.25rem; color: var(--ml-blue); }
+    .mylink-login .form-control { background-color: #f5f5f5; border: 1px solid #e5e5e5; border-radius: 12px; min-height: 50px; }
+    .mylink-login .form-control:focus { background-color: #fff; border-color: var(--ml-blue); box-shadow: 0 0 0 .25rem rgba(80, 124, 243, .18); }
+    .mylink-login .password-input { padding-right: 3.5rem; }
+    .mylink-login .password-toggle { right: 6px; top: 50%; transform: translateY(-50%); border: 0; color: #666; }
+    .mylink-login .password-toggle:focus-visible { outline: 2px solid var(--ml-blue); }
+    .mylink-login .login-button { background: var(--ml-blue); border-color: var(--ml-blue); min-height: 50px; border-radius: 12px; font-weight: 600; }
+    .mylink-login .login-button:hover { background: #3e68df; border-color: #3e68df; }
+    .mylink-login .login-button:focus-visible { box-shadow: 0 0 0 .25rem rgba(80, 124, 243, .3); }
+</style>
+
+<section class="mylink-login d-flex align-items-center justify-content-center px-2 py-4" aria-labelledby="login-title">
+    <div class="login-card card border-0">
+        <div class="card-body p-4 p-sm-5">
+            <div class="brand d-flex align-items-center justify-content-center gap-1 mb-4" aria-label="MyLink+">
+                <span aria-hidden="true"><span class="brand-blue">my</span>link</span>
+                <span class="brand-icon" aria-hidden="true"><i class="bi bi-link-45deg"></i><span class="brand-plus">+</span></span>
+            </div>
+
+            <div class="text-center mb-4">
+                <h1 id="login-title" class="h4 fw-semibold mb-2">Bem-vindo de volta!</h1>
+                <p class="text-secondary small mb-0">Entre para organizar seus links em um só lugar.</p>
+            </div>
+
+            <!--conecta fornt com -->
+            <form id="mylink-login-form" action="/login" method="post"> 
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars(
+                    $_SESSION['csrf_token'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                    ) ?>"
+                >
+
+                <div class="mb-3">
+                    <label for="login-email" class="form-label small fw-semibold">E-mail</label>
+                    <input type="email" id="login-email" name="email" class="form-control px-3" placeholder="voce@exemplo.com" autocomplete="username" required>
+                </div>
+                <div class="mb-4">
+                    <label for="login-password" class="form-label small fw-semibold">Senha</label>
+                    <div class="position-relative">
+                        <input type="password" id="login-password" name="password" class="form-control password-input ps-3" placeholder="Digite sua senha" autocomplete="current-password" required>
+                        <button type="button" id="login-toggle-password" class="btn password-toggle position-absolute" aria-label="Mostrar senha" aria-controls="login-password" aria-pressed="false">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary login-button w-100">Entrar <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></button>
+                <p id="login-feedback" class="small text-secondary text-center mt-3 mb-0" role="status" hidden></p>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    (() => {
+        const password = document.getElementById('login-password');
+        const toggle = document.getElementById('login-toggle-password');
+
+        toggle.addEventListener('click', () => {
+            const visible = password.type === 'password';
+
+            password.type = visible ? 'text' : 'password';
+
+            toggle.setAttribute('aria-pressed', String(visible));
+            toggle.setAttribute(
+                'aria-label',
+                visible ? 'Ocultar senha' : 'Mostrar senha'
+            );
+
+            toggle.querySelector('i').className =
+                visible ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    })();
+</script>

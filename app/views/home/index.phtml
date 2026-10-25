@@ -1,0 +1,336 @@
+<link rel="stylesheet" href="/assets/css/home.css">
+
+<div class="mylink-app">
+
+    <!-- Cabeçalho exibido em celulares e tablets -->
+    <header class="mylink-mobile-header d-lg-none
+                   d-flex align-items-center justify-content-between p-3">
+
+        <a href="/home" class="mylink-brand" aria-label="MyLink+">
+            <span>my</span>link<span>+</span>
+        </a>
+
+        <button
+            type="button"
+            class="btn btn-light"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#mylink-sidebar"
+            aria-controls="mylink-sidebar"
+            aria-label="Abrir menu"
+        >
+            <i class="bi bi-list fs-4" aria-hidden="true"></i>
+        </button>
+    </header>
+
+    <!-- Fixo no computador; retrátil no celular -->
+    <aside
+        id="mylink-sidebar"
+        class="mylink-sidebar offcanvas-lg offcanvas-start"
+        tabindex="-1"
+        aria-label="Menu principal"
+    >
+        <div class="offcanvas-header">
+            <h2 class="offcanvas-title h5">Menu</h2>
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="offcanvas"
+                data-bs-target="#mylink-sidebar"
+                aria-label="Fechar menu"
+            ></button>
+        </div>
+
+        <div class="offcanvas-body d-flex flex-column p-4 h-100">
+
+            <a href="/home" class="mylink-brand mb-4" aria-label="MyLink+">
+                <span>my</span>link<span>+</span>
+            </a>
+
+            <button
+                type="button"
+                class="btn mylink-button py-3 mb-3"
+                data-bs-toggle="modal"
+                data-bs-target="#new-link-modal"
+            >
+                <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>
+                Novo
+            </button>
+
+            <hr class="mt-0">
+
+            <nav class="nav flex-column" aria-label="Navegação principal">
+                <a href="/home" class="nav-link active" aria-current="page">
+                <i class="bi bi-house-door-fill" aria-hidden="true"></i>
+                    Home
+                </a>
+
+                <a href="#links-title" class="nav-link" id="menu-links">
+                <i class="bi bi-link-45deg" aria-hidden="true"></i>
+                    Links
+                </a>
+
+                <button type="button" class="nav-link" data-feature="qrcodes">
+                <i class="bi bi-qr-code" aria-hidden="true"></i>
+                    QR codes
+                </button>
+
+                <button type="button" class="nav-link" data-feature="analises">
+                <i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
+                    Análises
+                </button>
+
+                <hr>
+
+                <button type="button" class="nav-link" data-feature="configuracoes">
+                <i class="bi bi-gear-fill" aria-hidden="true"></i>
+                    Configurações
+                </button>
+
+                <?php if (\Lib\Authentication\Auth::isAdmin()): ?>
+                    <a href="/admin" class="nav-link">
+                    <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
+                        Administração
+                    </a>
+                <?php endif; ?>
+            </nav>
+
+        <form action="/logout" method="post" class="mt-3">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars(
+                $_SESSION['csrf_token'],
+                ENT_QUOTES,
+                'UTF-8'
+                ) ?>"
+            >
+            <!--logout -->
+            <button type="submit" class="btn mylink-logout w-100">
+            <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>
+                Sair
+            </button>
+        </form>
+
+            <p class="small text-secondary mt-auto pt-4 mb-0">
+                MyLink+ · Seus links, organizados.
+            </p>
+        </div>
+    </aside>
+
+    <div class="mylink-content">
+
+        <header class="d-flex flex-wrap gap-3 align-items-center
+                       justify-content-between mb-4">
+            <div>
+                <p class="small text-secondary mb-1">SEU ESPAÇO DE LINKS</p>
+                <h1 class="h3 fw-semibold mb-0">Tudo em um só lugar.</h1>
+            </div>
+
+            <div class="input-group mylink-search">
+                <span class="input-group-text bg-white">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                </span>
+
+                <input
+                    id="link-search"
+                    type="search"
+                    class="form-control"
+                    placeholder="Buscar links desta página"
+                    aria-label="Buscar links desta página"
+                >
+            </div>
+        </header>
+
+        <div id="feature-feedback" class="alert alert-primary" role="status" hidden>
+            <strong id="feature-title"></strong>
+            <p id="feature-description" class="mb-0 mt-1"></p>
+        </div>
+
+        <!-- Resumo -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-6 col-xl-3">
+                <div class="mylink-card p-3 p-sm-4 h-100">
+                    <div class="mylink-stat-icon">
+                        <i class="bi bi-link-45deg" aria-hidden="true"></i>
+                    </div>
+                    <p class="small text-secondary mb-1">Links salvos</p>
+                    <p id="link-count" class="h2 mb-0">0</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-xl-3">
+                <div class="mylink-card p-3 p-sm-4 h-100">
+                    <div class="mylink-stat-icon">
+                        <i class="bi bi-folder" aria-hidden="true"></i>
+                    </div>
+                    <p class="small text-secondary mb-1">Pastas</p>
+                    <p class="h2 mb-0">0</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-xl-3">
+                <div class="mylink-card p-3 p-sm-4 h-100">
+                    <div class="mylink-stat-icon">
+                        <i class="bi bi-qr-code" aria-hidden="true"></i>
+                    </div>
+                    <p class="small text-secondary mb-1">QR codes</p>
+                    <p class="h2 mb-0">0</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-xl-3">
+                <div class="mylink-card p-3 p-sm-4 h-100">
+                    <div class="mylink-stat-icon">
+                        <i class="bi bi-bar-chart" aria-hidden="true"></i>
+                    </div>
+                    <p class="small text-secondary mb-1">Total de acessos</p>
+                    <p class="h2 mb-0">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pastas -->
+        <section class="mylink-card p-4 mb-4" aria-labelledby="folders-title">
+            <h2 id="folders-title" class="h5 fw-semibold">Suas pastas</h2>
+
+            <div class="d-flex align-items-center gap-3 mt-3">
+                <i class="bi bi-folder-fill fs-1 text-primary"
+                   aria-hidden="true"></i>
+
+                <p class="small text-secondary mb-0">
+                    Nenhuma pasta por enquanto.
+                    Em breve, você poderá organizar seus links por assunto.
+                </p>
+            </div>
+        </section>
+
+        <!-- Links -->
+        <section class="mylink-card overflow-hidden"
+                 aria-labelledby="links-title">
+
+            <div class="d-flex flex-wrap gap-3 align-items-center
+                        justify-content-between p-4 border-bottom">
+                <div>
+                    <h2 id="links-title" class="h5 fw-semibold mb-1">
+                        Links recentes
+                    </h2>
+                    <p class="small text-secondary mb-0">
+                        Acesso rápido ao que você salva.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn mylink-button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#new-link-modal"
+                >
+                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+                    Adicionar link
+                </button>
+            </div>
+
+            <div id="links-empty" class="mylink-empty">
+                <i class="bi bi-link-45deg display-4 text-secondary"
+                   aria-hidden="true"></i>
+
+                <h3 class="h6 mt-3">Seu primeiro link começa aqui.</h3>
+
+                <p class="small text-secondary mb-0">
+                    Clique em “Adicionar link” para experimentar.
+                </p>
+            </div>
+
+            <div id="links-table-wrapper" class="table-responsive" hidden>
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="ps-4">Nome</th>
+                            <th scope="col">Destino</th>
+                            <th scope="col" class="pe-4 text-nowrap">
+                                Criado em
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="links-table-body"></tbody>
+                </table>
+            </div>
+
+            <p id="links-no-results"
+               class="text-center text-secondary p-4 mb-0"
+               hidden>
+                Nenhum link encontrado.
+            </p>
+        </section>
+
+        <p class="small text-secondary mt-3">
+            Prévia da interface: os links adicionados desaparecem
+            ao recarregar a página.
+        </p>
+    </div>
+</div>
+
+<!-- Formulário de demonstração -->
+<div
+    id="new-link-modal"
+    class="modal fade"
+    tabindex="-1"
+    aria-labelledby="new-link-title"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+
+            <div class="modal-header">
+                <h2 id="new-link-title" class="modal-title fs-5">
+                    Adicionar link
+                </h2>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
+            </div>
+
+            <form id="new-link-form">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="link-name" class="form-label">Nome</label>
+                        <input id="link-name"
+                               class="form-control"
+                               maxlength="100"
+                               placeholder="Ex.: Material da faculdade"
+                               required>
+                    </div>
+
+                    <div>
+                        <label for="link-url" class="form-label">
+                            URL de destino
+                        </label>
+                        <input id="link-url"
+                               type="url"
+                               class="form-control"
+                               placeholder="https://exemplo.com"
+                               required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" class="btn mylink-button">
+                        Adicionar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/home.js"></script>
