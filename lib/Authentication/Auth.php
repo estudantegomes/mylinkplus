@@ -4,7 +4,6 @@ namespace Lib\Authentication;
 
 use App\Models\User;
 
-
 //cookie com o identificador da sessão
 class Auth
 {
@@ -21,7 +20,7 @@ class Auth
             'id' => $user->id,
         ];
     }
-    
+
     public static function user(): ?User
     {
         $id = $_SESSION['user']['id'] ?? null;

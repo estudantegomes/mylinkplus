@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Middleware;
 
@@ -11,7 +11,7 @@ class Administrator implements Middleware
     public function handle(Request $request): void
     {
         //exige sessão autenticada para prosseguir
-       (new Authenticate())->handle($request);
+        (new Authenticate())->handle($request);
 
         //permissão administrativa
         if (!Auth::isAdmin()) {

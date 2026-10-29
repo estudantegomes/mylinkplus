@@ -12,7 +12,7 @@ class Authenticate implements Middleware
     public function handle(Request $request): void
     {
         header('Cache-Control: no-store');
-        
+
         if (!Auth::check()) {
             FlashMessage::danger(
                 'Faça login para acessar esta página.'
