@@ -66,9 +66,8 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       DB_DATABASE: encurtador_test
-      DB_USERNAME: encurtador_user
-      DB_PASSWORD: change_this_password
-
+      DB_USERNAME: "${DB_USERNAME}"
+      DB_PASSWORD: "${DB_PASSWORD}"
 networks:
   app-network:
     driver: bridge

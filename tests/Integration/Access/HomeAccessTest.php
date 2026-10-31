@@ -12,9 +12,10 @@ class HomeAccessTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
         $this->client = new Client([
             'allow_redirects' => false,
-            'base_uri' => 'http://web:8080'
+            'base_uri' => 'http://web:8080',
         ]);
     }
 
@@ -23,6 +24,32 @@ class HomeAccessTest extends TestCase
         $response = $this->client->get('/');
 
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertStringContainsString('Home Page', (string) $response->getBody());
+
+        $this->assertStringContainsString(
+            'id="mylink-login-form"',
+            (string) $response->getBody()
+        );
+    }
+
+    public function test_guest_cannot_access_home(): void
+    {
+        $response = $this->client->get('/home');
+
+        $this->assertEquals(302, $response->getStatusCode());
+        $this->assertEquals(
+            '/login',
+            $response->getHeaderLine('Location')
+        );
+    }
+
+    public function test_guest_cannot_access_admin(): void
+    {
+        $response = $this->client->get('/admin');
+
+        $this->assertEquals(302, $response->getStatusCode());
+        $this->assertEquals(
+            '/login',
+            $response->getHeaderLine('Location')
+        );
     }
 }

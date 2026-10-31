@@ -4,18 +4,17 @@ namespace Lib\Authentication;
 
 use App\Models\User;
 
-//cookie com o identificador da sessão
 class Auth
 {
     public static function login(User $user): void
     {
-        //troca o identificador
+        //Renova o identificador da sessão após autenticar
         session_regenerate_id(true);
 
-        //demo
+        // Remove o acesso demonstrativo antigo
         unset($_SESSION['mylink_demo']);
 
-        //guarda somente o identificador
+        // Guarda somente o identificador do usuário
         $_SESSION['user'] = [
             'id' => $user->id,
         ];
@@ -36,7 +35,7 @@ class Auth
     {
         $user = self::user();
 
-        return $user !== null && $user->is_active === true;
+        return $user !== null && $user->isActive();
     }
 
     public static function logout(): void
@@ -51,7 +50,7 @@ class Auth
         $user = self::user();
 
         return $user !== null
-            && $user->is_active === true
+            && $user->isActive()
             && $user->role === 'admin';
     }
 }

@@ -51,7 +51,7 @@ class HomeController extends Controller
         if (
             $user === null ||
             !$user->authenticate($password) ||
-            $user->is_active !== true
+            !$user->isActive()
         ) {
             FlashMessage::danger('E-mail ou senha inválidos.');
 

@@ -59,4 +59,9 @@ class User extends Model
             $this->password_hash = password_hash($value, PASSWORD_DEFAULT);
         }
     }
+
+    public function isActive(): bool
+    {
+        return $this->is_active;
+    }
 }

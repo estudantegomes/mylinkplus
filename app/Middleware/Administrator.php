@@ -18,7 +18,7 @@ class Administrator implements Middleware
             http_response_code(403);
 
             header('Content-Type: text/html; charset=UTF-8');
-            require__DIR__ . '/app/Views/errors/403.phtml';
+            require __DIR__ . '/../views/errors/403.phtml';
 
             exit;
         }

@@ -18,9 +18,9 @@ class RouterTest extends TestCase
 
     public function tearDown(): void
     {
-        $routerReflection = new \ReflectionClass(Router::class);
-        $instanceProperty = $routerReflection->getProperty('instance');
-        $instanceProperty->setValue(null, null);
+        Router::reset();
+
+        parent::tearDown();
     }
 
     public function test_singleton_should_return_the_same_object(): void

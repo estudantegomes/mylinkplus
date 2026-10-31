@@ -2,13 +2,13 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd"
   colors="true" cacheDirectory=".cache/phpunit"
-  displayDetailsOnTestsThatTriggerWarnings="true">
+  displayDetailsOnTestsThatTriggerWarnings="true"
+  bootstrap="tests/bootstrap.php">
+
   <php>
-    <env name="APP_ENV" value="testing" />
-    <env name="DB_HOST" value="db" />
-    <env name="DB_PORT" value="5432" />
-    <env name="DB_DATABASE" value="encurtador_test" />
-    <env name="DB_USERNAME" value="encurtador_user" />
-    <env name="DB_PASSWORD" value="change_this_password" />
+    <env name="APP_ENV" value="testing" force="true" />
+    <env name="DB_HOST" value="db" force="true" />
+    <env name="DB_PORT" value="5432" force="true" />
+    <env name="DB_DATABASE" value="encurtador_test" force="true" />
   </php>
 </phpunit>

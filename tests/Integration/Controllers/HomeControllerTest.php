@@ -2,16 +2,29 @@
 
 namespace Tests\Integration\Controllers;
 
+use App\Controllers\HomeController;
+
 class HomeControllerTest extends ControllerTestCase
 {
-    public function test_render_home_page(): void
+    public function test_render_login_page(): void
     {
+        $_SESSION = [];
+
         $response = $this->get(
-            action: 'index',
-            controllerName: 'App\Controllers\HomeController'
+            action: 'login',
+            controllerName: HomeController::class
         );
 
-        $this->assertMatchesRegularExpression('/<h1>\s*Home Page\s*<\/h1>/', $response);
-        $this->assertMatchesRegularExpression('/TSI3D Framework Template/', $response);
+        $this->assertStringContainsString(
+            'id="mylink-login-form"',
+            $response
+        );
+
+        $this->assertStringContainsString(
+            'name="csrf_token"',
+            $response
+        );
+
+        $this->assertNotEmpty($_SESSION['csrf_token']);
     }
 }

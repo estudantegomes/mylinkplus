@@ -25,8 +25,9 @@ class AuthTest extends TestCase
 
     public function tearDown(): void
     {
-        parent::setUp();
         $_SESSION = [];
+
+        parent::tearDown();
     }
 
     public function test_login(): void
