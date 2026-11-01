@@ -8,34 +8,27 @@ class Auth
 {
     public static function login(User $user): void
     {
+        //Renova o identificador da sessão após autenticar
         session_regenerate_id(true);
 
+        // Remove o acesso demonstrativo antigo
         unset($_SESSION['mylink_demo']);
 
-        $id = $user->__get('id') ?? $user->id;
-
+        // Guarda somente o identificador do usuário
         $_SESSION['user'] = [
-            'id' => (int) $id,
+            'id' => $user->id,
         ];
     }
 
     public static function user(): ?User
     {
-        $rawId = $_SESSION['user']['id'] ?? null;
+        $id = $_SESSION['user']['id'] ?? null;
 
-        if ($rawId === null || !is_numeric($rawId)) {
+        if (!is_int($id) || $id < 1) {
             return null;
         }
 
-        $id = (int) $rawId;
-
-        if ($id < 1) {
-            return null;
-        }
-
-        /** @var User|null $user */
-        $user = User::findBy(['id' => $id]);
-        return $user;
+        return User::findById($id);
     }
 
     public static function check(): bool
@@ -58,6 +51,6 @@ class Auth
 
         return $user !== null
             && $user->isActive()
-            && $user->__get('role') === 'admin';
+            && $user->role === 'admin';
     }
 }

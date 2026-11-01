@@ -100,11 +100,12 @@
                 type="hidden"
                 name="csrf_token"
                 value="<?= htmlspecialchars(
-                $_SESSION['csrf_token'] ?? '',
+                $_SESSION['csrf_token'],
                 ENT_QUOTES,
                 'UTF-8'
                 ) ?>"
             >
+            <!--logout -->
             <button type="submit" class="btn mylink-logout w-100">
             <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>
                 Sair
@@ -165,7 +166,7 @@
                         <i class="bi bi-folder" aria-hidden="true"></i>
                     </div>
                     <p class="small text-secondary mb-1">Pastas</p>
-                    <p class="h2 mb-0"><?= count($allFolders ?? []) ?></p>
+                    <p class="h2 mb-0">0</p>
                 </div>
             </div>
 
@@ -192,114 +193,25 @@
 
         <!-- Pastas -->
         <section class="mylink-card p-4 mb-4" aria-labelledby="folders-title">
-            <!-- NAVEGAÇÃO BREADCRUMB ESTILO GOOGLE DRIVE -->
-            <nav aria-label="Navegação de pastas" class="mb-3">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item <?= empty($currentFolder) ? 'active fw-semibold' : '' ?>">
-                        <?php if (!empty($currentFolder)): ?>
-                            <a href="/home" class="text-decoration-none">
-                                <i class="bi bi-house-door-fill me-1"></i>Raiz
-                            </a>
-                        <?php else: ?>
-                            <i class="bi bi-house-door-fill me-1"></i>Raiz
-                        <?php endif; ?>
-                    </li>
+            <h2 id="folders-title" class="h5 fw-semibold">Suas pastas</h2>
 
-                    <?php foreach ($breadcrumbs ?? [] as $index => $crumb): ?>
-                        <?php 
-                            $crumbId = (int) $crumb->__get('id');
-                            $crumbName = (string) $crumb->__get('name');
-                            $isLast = ($index === count($breadcrumbs) - 1);
-                        ?>
-                        <li class="breadcrumb-item <?= $isLast ? 'active fw-semibold' : '' ?>" <?= $isLast ? 'aria-current="page"' : '' ?>>
-                            <?php if (!$isLast): ?>
-                                <a href="/home?folder_id=<?= $crumbId ?>" class="text-decoration-none">
-                                    <?= htmlspecialchars($crumbName, ENT_QUOTES, 'UTF-8') ?>
-                                </a>
-                            <?php else: ?>
-                                <?= htmlspecialchars($crumbName, ENT_QUOTES, 'UTF-8') ?>
-                            <?php endif; ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ol>
-            </nav>
+            <div class="d-flex align-items-center gap-3 mt-3">
+                <i class="bi bi-folder-fill fs-1 text-primary"
+                   aria-hidden="true"></i>
 
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h2 id="folders-title" class="h5 fw-semibold mb-0">
-                    <?= !empty($currentFolder) ? htmlspecialchars((string) $currentFolder->__get('name'), ENT_QUOTES, 'UTF-8') : 'Suas pastas' ?>
-                </h2>
-
-                <button
-                    type="button"
-                    class="btn btn-sm btn-primary rounded-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#createFolderModal"
-                >
-                    <i class="bi bi-folder-plus me-1" aria-hidden="true"></i>
-                    Nova pasta
-                </button>
+                <p class="small text-secondary mb-0">
+                    Nenhuma pasta por enquanto.
+                    Em breve, você poderá organizar seus links por assunto.
+                </p>
             </div>
-
-            <?php if (empty($folders)): ?>
-                <div class="d-flex align-items-center gap-3 mt-3">
-                    <i class="bi bi-folder-fill fs-1 text-primary" aria-hidden="true"></i>
-                    <p class="small text-secondary mb-0">
-                        Nenhuma pasta <?= !empty($currentFolder) ? 'neste diretório' : 'na raiz' ?>.<br>
-                        Clique em "Nova pasta" para organizar os seus links.
-                    </p>
-                </div>
-            <?php else: ?>
-                <div class="row g-3 mt-1">
-                    <?php foreach ($folders as $folder): ?>
-                        <?php 
-                            $folderId = (int) $folder->__get('id');
-                            $folderName = (string) $folder->__get('name');
-                            $parentId = $folder->__get('parent_id') !== null ? (int) $folder->__get('parent_id') : null;
-                        ?>
-                        <div class="col-sm-6 col-md-4 col-xl-3">
-                            <div class="border rounded-3 p-3 d-flex align-items-center justify-content-between bg-body-tertiary shadow-sm-hover">
-                                <!-- Link para Entrar na Pasta -->
-                                <a href="/home?folder_id=<?= $folderId ?>" class="d-flex align-items-center gap-2 overflow-hidden me-2 text-decoration-none text-dark flex-grow-1">
-                                    <i class="bi bi-folder-fill text-primary fs-5 flex-shrink-0" aria-hidden="true"></i>
-                                    <span class="fw-semibold text-truncate small" title="<?= htmlspecialchars($folderName, ENT_QUOTES, 'UTF-8') ?>">
-                                        <?= htmlspecialchars($folderName, ENT_QUOTES, 'UTF-8') ?>
-                                    </span>
-                                </a>
-
-                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
-                                    <!-- Botão Editar -->
-                                    <button
-                                        type="button"
-                                        class="btn btn-sm btn-link text-secondary p-1"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editFolderModal"
-                                        data-id="<?= $folderId ?>"
-                                        data-name="<?= htmlspecialchars($folderName, ENT_QUOTES, 'UTF-8') ?>"
-                                        data-parent="<?= $parentId ?? '' ?>"
-                                        title="Editar pasta"
-                                    >
-                                        <i class="bi bi-pencil" aria-hidden="true"></i>
-                                    </button>
-
-                                    <!-- Form Excluir -->
-                                    <form action="/folders/destroy" method="post" class="d-inline" onsubmit="return confirm('Deseja realmente excluir esta pasta e seu conteúdo?');">
-                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                                        <input type="hidden" name="id" value="<?= $folderId ?>">
-                                        <button type="submit" class="btn btn-sm btn-link text-danger p-1" title="Excluir pasta">
-                                            <i class="bi bi-trash" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
         </section>
 
         <!-- Links -->
-        <section class="mylink-card overflow-hidden" aria-labelledby="links-title">
-            <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between p-4 border-bottom">
+        <section class="mylink-card overflow-hidden"
+                 aria-labelledby="links-title">
+
+            <div class="d-flex flex-wrap gap-3 align-items-center
+                        justify-content-between p-4 border-bottom">
                 <div>
                     <h2 id="links-title" class="h5 fw-semibold mb-1">
                         Links recentes
@@ -321,8 +233,11 @@
             </div>
 
             <div id="links-empty" class="mylink-empty">
-                <i class="bi bi-link-45deg display-4 text-secondary" aria-hidden="true"></i>
+                <i class="bi bi-link-45deg display-4 text-secondary"
+                   aria-hidden="true"></i>
+
                 <h3 class="h6 mt-3">Seu primeiro link começa aqui.</h3>
+
                 <p class="small text-secondary mb-0">
                     Clique em “Adicionar link” para experimentar.
                 </p>
@@ -334,25 +249,30 @@
                         <tr>
                             <th scope="col" class="ps-4">Nome</th>
                             <th scope="col">Destino</th>
-                            <th scope="col" class="pe-4 text-nowrap">Criado em</th>
+                            <th scope="col" class="pe-4 text-nowrap">
+                                Criado em
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="links-table-body"></tbody>
                 </table>
             </div>
 
-            <p id="links-no-results" class="text-center text-secondary p-4 mb-0" hidden>
+            <p id="links-no-results"
+               class="text-center text-secondary p-4 mb-0"
+               hidden>
                 Nenhum link encontrado.
             </p>
         </section>
 
         <p class="small text-secondary mt-3">
-            Prévia da interface: os links adicionados desaparecem ao recarregar a página.
+            Prévia da interface: os links adicionados desaparecem
+            ao recarregar a página.
         </p>
     </div>
 </div>
 
-<!-- Modal: Adicionar Link -->
+<!-- Formulário de demonstração -->
 <div
     id="new-link-modal"
     class="modal fade"
@@ -362,125 +282,51 @@
 >
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0">
+
             <div class="modal-header">
-                <h2 id="new-link-title" class="modal-title fs-5">Adicionar link</h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <h2 id="new-link-title" class="modal-title fs-5">
+                    Adicionar link
+                </h2>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
             </div>
 
             <form id="new-link-form">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="link-name" class="form-label">Nome</label>
-                        <input id="link-name" class="form-control" maxlength="100" placeholder="Ex.: Material da faculdade" required>
+                        <input id="link-name"
+                               class="form-control"
+                               maxlength="100"
+                               placeholder="Ex.: Material da faculdade"
+                               required>
                     </div>
 
                     <div>
-                        <label for="link-url" class="form-label">URL de destino</label>
-                        <input id="link-url" type="url" class="form-control" placeholder="https://exemplo.com" required>
+                        <label for="link-url" class="form-label">
+                            URL de destino
+                        </label>
+                        <input id="link-url"
+                               type="url"
+                               class="form-control"
+                               placeholder="https://exemplo.com"
+                               required>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn mylink-button">Adicionar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
 
-<!-- Modal: Criar Pasta -->
-<div
-    id="createFolderModal"
-    class="modal fade"
-    tabindex="-1"
-    aria-labelledby="createFolderModalTitle"
-    aria-hidden="true"
->
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0">
-            <div class="modal-header">
-                <h2 id="createFolderModalTitle" class="modal-title fs-5 fw-semibold">Nova Pasta</h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-
-            <form action="/folders" method="post">
-                <div class="modal-body">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-
-                    <div class="mb-3">
-                        <label for="create-name" class="form-label small fw-semibold">Nome da Pasta</label>
-                        <input type="text" id="create-name" name="name" class="form-control" placeholder="Ex: Trabalho, Estudos" required>
-                    </div>
-
-                    <div>
-                        <label for="create-parent" class="form-label small fw-semibold">Pasta Pai (Opcional)</label>
-                        <select id="create-parent" name="parent_id" class="form-select">
-                            <option value="">-- Nenhuma (Pasta Raiz) --</option>
-                            <?php foreach ($allFolders ?? [] as $f): ?>
-                                <?php 
-                                    $fId = (int) $f->__get('id');
-                                    $fName = (string) $f->__get('name');
-                                    $selected = (!empty($currentFolder) && (int) $currentFolder->__get('id') === $fId) ? 'selected' : '';
-                                ?>
-                                <option value="<?= $fId ?>" <?= $selected ?>>
-                                    <?= htmlspecialchars($fName, ENT_QUOTES, 'UTF-8') ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Editar Pasta -->
-<div
-    id="editFolderModal"
-    class="modal fade"
-    tabindex="-1"
-    aria-labelledby="editFolderModalTitle"
-    aria-hidden="true"
->
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0">
-            <div class="modal-header">
-                <h2 id="editFolderModalTitle" class="modal-title fs-5 fw-semibold">Editar Pasta</h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-
-            <form action="/folders/update" method="post">
-                <div class="modal-body">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                    <input type="hidden" id="edit-id" name="id" value="">
-
-                    <div class="mb-3">
-                        <label for="edit-name" class="form-label small fw-semibold">Nome da Pasta</label>
-                        <input type="text" id="edit-name" name="name" class="form-control" required>
-                    </div>
-
-                    <div>
-                        <label for="edit-parent" class="form-label small fw-semibold">Pasta Pai (Opcional)</label>
-                        <select id="edit-parent" name="parent_id" class="form-select">
-                            <option value="">-- Nenhuma (Pasta Raiz) --</option>
-                            <?php foreach ($allFolders ?? [] as $f): ?>
-                                <option value="<?= (int) $f->__get('id') ?>">
-                                    <?= htmlspecialchars((string) $f->__get('name'), ENT_QUOTES, 'UTF-8') ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Atualizar</button>
+                    <button type="submit" class="btn mylink-button">
+                        Adicionar
+                    </button>
                 </div>
             </form>
         </div>
@@ -488,27 +334,3 @@
 </div>
 
 <script src="/assets/js/home.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const editModal = document.getElementById('editFolderModal');
-    if (!editModal) return;
-
-    editModal.addEventListener('show.bs.modal', (event) => {
-        const button = event.relatedTarget;
-        if (!button) return;
-
-        const id = button.getAttribute('data-id') || '';
-        const name = button.getAttribute('data-name') || '';
-        const parent = button.getAttribute('data-parent') || '';
-
-        const editIdInput = document.getElementById('edit-id');
-        const editNameInput = document.getElementById('edit-name');
-        const editParentSelect = document.getElementById('edit-parent');
-
-        if (editIdInput) editIdInput.value = id;
-        if (editNameInput) editNameInput.value = name;
-        if (editParentSelect) editParentSelect.value = parent;
-    });
-});
-</script>
