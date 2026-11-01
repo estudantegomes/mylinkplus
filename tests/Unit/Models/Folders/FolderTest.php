@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Models;
+namespace Tests\Unit\Models\Folders;
 
 use App\Models\Folder;
 use App\Models\User;
