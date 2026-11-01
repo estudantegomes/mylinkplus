@@ -2,30 +2,40 @@
 
 namespace App\Models;
 
-use Lib\Validations;
 use Core\Database\ActiveRecord\Model;
+use Lib\Validations;
 
 /**
  * @property int $id
  * @property string $name
  * @property string $email
- * @property string $password_hash
+ * @property string|null $password_hash
+ * @property bool $is_active
+ * @property string $role
  */
 class User extends Model
 {
     protected static string $table = 'users';
     protected static array $columns = ['name', 'email', 'password_hash', 'is_active', 'role'];
-
     protected ?string $password = null;
     protected ?string $password_confirmation = null;
-    protected bool $is_active = true;
-    protected string $role = 'user';
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        if ($this->__get('is_active') === null) {
+            $this->__set('is_active', true);
+        }
+    }
 
     public function validates(): void
     {
         Validations::notEmpty('name', $this);
         Validations::notEmpty('email', $this);
-
         Validations::uniqueness('email', $this);
 
         if ($this->newRecord()) {
@@ -35,16 +45,20 @@ class User extends Model
 
     public function authenticate(string $password): bool
     {
-        if ($this->password_hash == null) {
+        $hash = $this->__get('password_hash');
+
+        if (!is_string($hash) || $hash === '') {
             return false;
         }
 
-        return password_verify($password, $this->password_hash);
+        return password_verify($password, $hash);
     }
 
     public static function findByEmail(string $email): User | null
     {
-        return User::findBy(['email' => $email]);
+        /** @var User|null $user */
+        $user = User::findBy(['email' => $email]);
+        return $user;
     }
 
     public function __set(string $property, mixed $value): void
@@ -56,12 +70,18 @@ class User extends Model
             $this->newRecord() &&
             $value !== null && $value !== ''
         ) {
-            $this->password_hash = password_hash($value, PASSWORD_DEFAULT);
+            $this->__set('password_hash', password_hash($value, PASSWORD_DEFAULT));
         }
     }
 
     public function isActive(): bool
     {
-        return $this->is_active;
+        $active = $this->__get('is_active');
+
+        if (is_bool($active)) {
+            return $active;
+        }
+
+        return $active === 't' || $active === '1' || $active === 1 || $active === 'true';
     }
 }
