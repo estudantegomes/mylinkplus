@@ -95,87 +95,159 @@
         bootstrap.Modal.getOrCreateInstance(modal).hide();
     });
 })();
-
 (() => {
-    const sidebar = document.getElementById('mylink-sidebar');
-    const navigation = sidebar.querySelector('nav');
-    const feedback = document.getElementById('feature-feedback');
+    const foldersList = document.getElementById('folders-list');
+    const folderForm = document.getElementById('new-folder-form');
+    
+    if (!foldersList || !folderForm) return;
 
-    const features = {
-        qrcodes: {
-            title: 'QR codes',
-            description: 'A geração de QR codes está em desenvolvimento.'
-        },
-        analises: {
-            title: 'Análises',
-            description: 'As estatísticas de acesso estarão disponíveis em breve.'
-        },
-        configuracoes: {
-            title: 'Configurações',
-            description: 'As configurações da conta estão em desenvolvimento.'
+    const folderModalEl = document.getElementById('new-folder-modal');
+    const folderModal = bootstrap.Modal.getOrCreateInstance(folderModalEl);
+    const breadcrumbsEl = document.getElementById('folder-breadcrumbs');
+    
+    let breadcrumbPath = [{ id: null, name: 'Home' }];
+    
+    const getCurrentParentId = () => breadcrumbPath[breadcrumbPath.length - 1].id;
+
+    const renderBreadcrumbs = () => {
+        breadcrumbsEl.innerHTML = breadcrumbPath.map((crumb, index) => {
+            if (index === breadcrumbPath.length - 1) {
+                return `<li class="breadcrumb-item active" aria-current="page">${crumb.name}</li>`;
+            }
+            return `<li class="breadcrumb-item"><a href="#" class="text-decoration-none crumb-link" data-index="${index}">${crumb.name}</a></li>`;
+        }).join('');
+    };
+
+    const loadFolders = async () => {
+        const parentId = getCurrentParentId();
+        const url = parentId ? `/folders?parent_id=${parentId}` : '/folders';
+        
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Erro ao buscar pastas');
+            const folders = await res.json();
+            renderFolders(folders);
+            renderBreadcrumbs();
+        } catch (error) {
+            console.error(error);
         }
     };
 
-    function activateMenu(item) {
-        navigation.querySelectorAll('.nav-link').forEach((link) => {
-            link.classList.remove('active');
-            link.removeAttribute('aria-current');
-        });
-
-        item.classList.add('active');
-        item.setAttribute('aria-current', 'true');
-    }
-
-    function closeSidebar() {
-        // No celular, fecha o menu depois da escolha.
-        const offcanvas = bootstrap.Offcanvas.getInstance(sidebar);
-
-        if (offcanvas) {
-            offcanvas.hide();
+    const renderFolders = (folders) => {
+        if (folders.length === 0) {
+            foldersList.innerHTML = '<p class="small text-secondary mb-0 w-100" id="folders-empty-msg">Nenhuma pasta por enquanto.</p>';
+            return;
         }
-    }
 
-    document.getElementById('menu-links').addEventListener('click', (event) => {
-        event.preventDefault();
+        foldersList.innerHTML = folders.map(folder => `
+            <div class="d-flex align-items-center justify-content-between border rounded p-2 folder-item" style="border-left: 4px solid ${folder.color || '#507cf3'} !important; min-width: 220px; cursor: pointer;" data-id="${folder.id}" data-name="${folder.name}">
+                <div class="d-flex align-items-center gap-2 flex-grow-1 open-folder">
+                    <i class="bi bi-folder-fill" style="color: ${folder.color || '#507cf3'};"></i>
+                    <span class="fw-semibold small text-truncate" style="max-width: 120px;">${folder.name}</span>
+                </div>
+                <div class="d-flex gap-2 ms-3">
+                    <button class="btn btn-sm btn-link text-secondary p-0 edit-folder" data-id="${folder.id}" data-name="${folder.name}" data-color="${folder.color}" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link text-danger p-0 delete-folder" data-id="${folder.id}" title="Excluir">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    };
 
-        activateMenu(event.currentTarget);
-        feedback.hidden = true;
-        closeSidebar();
-
-        document.getElementById('links-title').scrollIntoView({
-            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-                ? 'auto'
-                : 'smooth',
-            block: 'start'
-        });
+    // Navegar para dentro da pasta
+    foldersList.addEventListener('click', (e) => {
+        const folderEl = e.target.closest('.open-folder');
+        if (!folderEl) return;
+        
+        const item = folderEl.closest('.folder-item');
+        breadcrumbPath.push({ id: item.dataset.id, name: item.dataset.name });
+        loadFolders();
     });
 
-    navigation.querySelectorAll('[data-feature]').forEach((button) => {
-        button.addEventListener('click', () => {
-            const feature = features[button.dataset.feature];
+    // Navegar no Breadcrumb
+    breadcrumbsEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (e.target.classList.contains('crumb-link')) {
+            const index = parseInt(e.target.dataset.index, 10);
+            breadcrumbPath = breadcrumbPath.slice(0, index + 1);
+            loadFolders();
+        }
+    });
 
-            activateMenu(button);
+    // Abrir Modal de Nova Pasta
+    document.getElementById('btn-new-folder').addEventListener('click', () => {
+        folderForm.reset();
+        document.getElementById('folder-id').value = '';
+        document.getElementById('folder-parent-id').value = getCurrentParentId() || '';
+        document.getElementById('new-folder-title').textContent = 'Criar Pasta';
+        folderModal.show();
+    });
 
-            document.getElementById('feature-title').textContent =
-                feature.title;
+    // Abrir Modal de Edição
+    foldersList.addEventListener('click', (e) => {
+        const btn = e.target.closest('.edit-folder');
+        if (!btn) return;
+        
+        document.getElementById('folder-id').value = btn.dataset.id;
+        document.getElementById('folder-parent-id').value = getCurrentParentId() || '';
+        document.getElementById('folder-name').value = btn.dataset.name;
+        document.getElementById('folder-color').value = btn.dataset.color;
+        document.getElementById('new-folder-title').textContent = 'Editar Pasta';
+        
+        folderModal.show();
+    });
 
-            document.getElementById('feature-description').textContent =
-                feature.description;
+    // Salvar Pasta (Criar ou Atualizar)
+    folderForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(folderForm);
+        const folderId = document.getElementById('folder-id').value;
+        const method = folderId ? 'PUT' : 'POST';
+        const url = folderId ? `/folders/${folderId}` : '/folders';
 
-            feedback.hidden = false;
-            closeSidebar();
+        // Fetch não envia body no PUT com FormData facilmente nativo do PHP, então usamos URLSearchParams
+        const data = new URLSearchParams(formData);
 
-            feedback.scrollIntoView({
-                behavior: 'auto',
-                block: 'nearest'
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: data
             });
-        });
-    });
 
-    // Revalida a sessão ao voltar para uma Home restaurada pelo navegador.
-    window.addEventListener('pageshow', (event) => {
-        if (event.persisted) {
-            window.location.reload();
+            if (res.ok) {
+                folderModal.hide();
+                loadFolders();
+            } else {
+                alert('Erro ao salvar pasta. Verifique os dados.');
+            }
+        } catch (error) {
+            console.error(error);
         }
     });
+
+    // Excluir pasta
+    foldersList.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.delete-folder');
+        if (!btn) return;
+
+        if (confirm('Tem certeza que deseja excluir esta pasta?')) {
+            const id = btn.dataset.id;
+            try {
+                const res = await fetch(`/folders/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadFolders();
+                } else {
+                    alert('Erro ao excluir pasta.');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    });
+
+    loadFolders();
 })();
