@@ -14,9 +14,9 @@ class FolderController extends Controller
     {
         $userId = $this->currentUser()->id;
         $parentId = $request->getParam('parent_id');
-        
+
         $pdo = Database::getDatabaseConn();
-        
+
         // Se houver parent_id, lista as subpastas; caso contrário, lista as pastas raiz.
         if ($parentId) {
             $sql = 'SELECT * FROM folders WHERE user_id = :user_id AND parent_id = :parent_id ORDER BY name ASC';
@@ -27,9 +27,9 @@ class FolderController extends Controller
             $stmt = $pdo->prepare($sql);
             $stmt->execute(['user_id' => $userId]);
         }
-        
+
         $folders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         $data = array_map(fn($f) => [
             'id' => $f['id'],
             'name' => $f['name'],
@@ -60,15 +60,15 @@ class FolderController extends Controller
     {
         $id = (int) $request->getParam('id');
         $folder = Folder::findById($id);
-        
+
         if ($folder && $folder->user_id === $this->currentUser()->id) {
             // Como é um PUT, lemos os dados brutos (raw) caso a classe Request não os encontre
             parse_str(file_get_contents("php://input"), $putData);
-            
+
             // Tenta pegar do Request (se POST), se não, pega do $putData, se não mantém o atual
             $folder->name = $request->getParam('name') ?? $putData['name'] ?? $folder->name;
             $folder->color = $request->getParam('color') ?? $putData['color'] ?? $folder->color;
-            
+
             if ($folder->save()) {
                 $this->jsonResponse(['success' => true]);
             } else {
@@ -82,7 +82,7 @@ class FolderController extends Controller
     public function destroy(Request $request): void
     {
         $folder = Folder::findById((int) $request->getParam('id'));
-        
+
         if ($folder && $folder->user_id === $this->currentUser()->id) {
             $folder->destroy();
             $this->jsonResponse(['success' => true]);
