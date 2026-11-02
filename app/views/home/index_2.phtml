@@ -1,0 +1,42 @@
+<!-- Pastas -->
+<section class="mylink-card p-4 mb-4" aria-labelledby="folders-title">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 id="folders-title" class="h5 fw-semibold mb-0">Suas pastas</h2>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#new-folder-modal">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Nova Pasta
+        </button>
+    </div>
+
+    <div id="folders-list" class="d-flex flex-wrap gap-3">
+        <!-- As pastas serão renderizadas aqui via JS -->
+        <p class="small text-secondary mb-0 w-100" id="folders-empty-msg">Nenhuma pasta por enquanto.</p>
+    </div>
+</section>
+
+<!-- Modal de Nova Pasta -->
+<div id="new-folder-modal" class="modal fade" tabindex="-1" aria-labelledby="new-folder-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header">
+                <h2 id="new-folder-title" class="modal-title fs-5">Criar Pasta</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form id="new-folder-form">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="folder-name" class="form-label">Nome da Pasta</label>
+                        <input id="folder-name" name="name" class="form-control" maxlength="100" placeholder="Ex.: Projetos" required>
+                    </div>
+                    <div>
+                        <label for="folder-color" class="form-label">Cor</label>
+                        <input type="color" id="folder-color" name="color" class="form-control form-control-color" value="#507cf3" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

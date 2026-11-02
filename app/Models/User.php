@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Lib\Validations;
 use Core\Database\ActiveRecord\Model;
+use Core\Database\ActiveRecord\HasMany;
 
 /**
  * @property int $id
@@ -58,6 +59,11 @@ class User extends Model
         ) {
             $this->password_hash = password_hash($value, PASSWORD_DEFAULT);
         }
+    }
+
+    public function folders(): HasMany
+    {
+        return $this->hasMany(Folder::class, 'user_id');
     }
 
     public function isActive(): bool

@@ -2,13 +2,12 @@
 
 use App\Controllers\HomeController;
 use App\Controllers\AdminController;
+use App\Controllers\FolderController;
 use Core\Router\Route;
 
 //rotas publicas de login
 Route::get('/', [HomeController::class, 'login'])->name('root');
-
 Route::get('/login', [HomeController::class, 'login'])->name('login');
-
 Route::post('/login', [HomeController::class, 'entrar'])->name('entrar');
 
 //rotas restritas -> verifica a sessão antes de executar o controller
@@ -30,4 +29,9 @@ Route::middleware('auth')->group(function () {
             'index'
         ])->name('admin');
     });
+
+    Route::get('/folders', [FolderController::class, 'index'])->name('folders.index');
+    Route::post('/folders', [FolderController::class, 'store'])->name('folders.store');
+    Route::put('/folders/{id}', [FolderController::class, 'update'])->name('folders.update');
+    Route::delete('/folders/{id}', [FolderController::class, 'destroy'])->name('folders.destroy');
 });
