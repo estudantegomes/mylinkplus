@@ -1,26 +1,19 @@
-<style>
-    .organization .btn {
-        transition: transform .15s ease, box-shadow .15s ease;
-    }
+<header class="org-topbar">
+    <div class="org-shell org-topbar-inner">
+        <a class="org-brand" href="/home" aria-label="MyLink+ — página inicial">
+            <span class="org-brand-mark"><?= $icon('link') ?></span>
+            <span><span class="org-brand-accent">my</span>link<span class="org-brand-accent">+</span></span>
+        </a>
 
-    .organization .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 3px 10px #0002;
-    }
+        <nav class="org-tabs" aria-label="Organização">
+            <a href="/folders"<?= $isFolder ? ' aria-current="location"' : '' ?>>
+                <?= $icon('folder') ?> Pastas
+            </a>
+            <a href="/tags"<?= !$isFolder ? ' aria-current="location"' : '' ?>>
+                <?= $icon('tag') ?> Tags
+            </a>
+        </nav>
 
-    @media (prefers-reduced-motion: reduce) {
-        .organization .btn { transition: none; }
-        .organization .btn:hover { transform: none; }
-    }
-</style>
-
-<nav class="d-flex flex-wrap align-items-center gap-2 mb-4" aria-label="Menu MyLink+">
-    <a class="btn btn-outline-primary" href="/home">Home</a>
-    <a class="btn btn-outline-primary" href="/folders">Pastas</a>
-    <a class="btn btn-outline-primary" href="/tags">Tags</a>
-
-    <form action="/logout" method="post" class="ms-auto mb-0">
-        <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
-        <button class="btn btn-outline-danger" type="submit">Sair</button>
-    </form>
-</nav>
+        <a class="org-btn org-home-link" href="/home"><?= $icon('back') ?> Voltar à home</a>
+    </div>
+</header>

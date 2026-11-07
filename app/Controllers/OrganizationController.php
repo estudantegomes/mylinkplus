@@ -14,6 +14,8 @@ use PDOException;
 
 abstract class OrganizationController extends Controller
 {
+    protected string $layout = 'organization';
+
     /** @var class-string<OrganizationItem> */
     protected string $model;
     protected string $resource;
@@ -31,7 +33,6 @@ abstract class OrganizationController extends Controller
         }
 
         $page = filter_var($request->getParam('page', 1), FILTER_VALIDATE_INT) ?: 1;
-
         $paginator = new Paginator(
             class: $this->model,
             page: $page,
@@ -59,7 +60,6 @@ abstract class OrganizationController extends Controller
     public function create(Request $request): void
     {
         Csrf::validate($request);
-
         $item = new $this->model(['user_id' => $this->userId()]);
         $this->fill($item, $request);
         $this->persist($item);
@@ -78,7 +78,6 @@ abstract class OrganizationController extends Controller
     public function update(Request $request): void
     {
         Csrf::validate($request);
-
         $item = $this->owned($request->getParam('id'));
         $this->fill($item, $request);
         $this->persist($item);
@@ -87,7 +86,6 @@ abstract class OrganizationController extends Controller
     public function destroy(Request $request): void
     {
         Csrf::validate($request);
-
         $item = $this->owned($request->getParam('id'));
 
         if (!$item->destroy()) {
@@ -97,21 +95,17 @@ abstract class OrganizationController extends Controller
         }
 
         FlashMessage::success('Registro excluído.');
-
         $query = $item instanceof Folder && $item->parent_id !== null
             ? '?parent_id=' . $item->parent_id : '';
-
         $this->redirectTo('/' . $this->resource . $query);
     }
 
     private function userId(): int
     {
         $user = $this->currentUser();
-
         if ($user === null || !$user->isActive()) {
             throw new HTTPException('Autenticacao necessaria.', 401);
         }
-
         return $user->id;
     }
 
@@ -123,7 +117,6 @@ abstract class OrganizationController extends Controller
         if ($item === null) {
             throw new HTTPException('Registro nao encontrado.', 404);
         }
-
         return $item;
     }
 
@@ -133,12 +126,10 @@ abstract class OrganizationController extends Controller
             $value = $request->getParam($field, '');
             $item->$field = is_string($value) ? trim($value) : '';
         }
-
         $item->color = $item->color === '' ? null : $item->color;
 
         if ($item instanceof Folder) {
             $parent = $request->getParam('parent_id');
-
             $item->parent_id = $parent === null || $parent === '' ? null
                 : (filter_var($parent, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: -1);
         }
@@ -156,7 +147,6 @@ abstract class OrganizationController extends Controller
             if ($exception->getCode() !== '23505') {
                 throw $exception;
             }
-
             $item->addError('name', 'Já existe um registro com este nome.');
         }
 
@@ -174,7 +164,6 @@ abstract class OrganizationController extends Controller
     private function view(string $view, array $data): void
     {
         header('Cache-Control: no-store');
-
         $this->render('organization/' . $view, array_merge($data, [
             'title' => $this->label . ' | MyLink+',
             'resource' => $this->resource,

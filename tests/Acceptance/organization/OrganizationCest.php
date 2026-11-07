@@ -14,12 +14,9 @@ class OrganizationCest extends BaseAcceptanceCest
     public function _before(AcceptanceTester $page): void
     {
         parent::_before($page);
-
         $page->amOnPage('/login');
         $page->resetCookie('PHPSESSID');
-
         Fixtures::user();
-
         $page->login('teste@example.com', 'Senha@12345');
         $page->waitForElement('#folders-title');
     }
@@ -35,7 +32,7 @@ class OrganizationCest extends BaseAcceptanceCest
             $page->see('Informe um nome', '[data-error=name]');
 
             $page->fillField('name', 'Inicial');
-            $page->fillField('color', '#507CF3');
+            $page->selectOption('input[name="color"]', '#507CF3');
             $page->click('#organization-form button[type=submit]');
             $page->waitForElement('#item-title');
             $page->see('Inicial', '#item-title');
@@ -44,7 +41,6 @@ class OrganizationCest extends BaseAcceptanceCest
             $page->fillField('name', '');
             $page->click('#organization-form button[type=submit]');
             $page->see('Informe um nome', '[data-error=name]');
-
             $page->fillField('name', 'Atualizado');
             $page->click('#organization-form button[type=submit]');
             $page->waitForElement('#item-title');
@@ -52,7 +48,6 @@ class OrganizationCest extends BaseAcceptanceCest
 
             $page->amOnPage('/' . $resource);
             $page->see('Atualizado', '#organization-table');
-
             $page->click('Detalhes');
             $page->click('Excluir');
             $page->acceptPopup();
@@ -63,15 +58,12 @@ class OrganizationCest extends BaseAcceptanceCest
                 $item = new $class(['user_id' => $owner->id, 'name' => sprintf('Item %02d', $number)]);
                 Assert::assertTrue($item->save());
             }
-
             $page->amOnPage('/' . $resource);
             $page->see('Item 01', '#organization-table');
             $page->dontSee('Item 11', '#organization-table');
-
             $page->click('Próxima');
             $page->see('Item 11', '#organization-table');
             $page->dontSee('Item 01', '#organization-table');
-
             $page->click('Anterior');
             $page->see('Item 01', '#organization-table');
         }
@@ -81,20 +73,17 @@ class OrganizationCest extends BaseAcceptanceCest
     {
         $owner = \App\Models\User::findByEmail('teste@example.com');
         Assert::assertNotNull($owner);
-
         $parent = new Folder(['user_id' => $owner->id, 'name' => 'Estudos']);
         Assert::assertTrue($parent->save());
 
         $page->amOnPage('/folders/new?parent_id=' . $parent->id);
         $page->fillField('name', 'Programação');
         $page->click('#organization-form button[type=submit]');
-
         $page->amOnPage('/folders?parent_id=' . $parent->id);
         $page->see('Programação', '#organization-table');
 
         $child = Folder::findBy(['user_id' => $owner->id, 'name' => 'Programação']);
         Assert::assertNotNull($child);
-
         $page->amOnPage('/folders/' . $parent->id . '/edit');
         $page->selectOption('parent_id', (string) $child->id);
         $page->click('#organization-form button[type=submit]');
