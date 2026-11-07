@@ -1,0 +1,70 @@
+<?php
+$editing = !$item->newRecord();
+$action = '/' . $resource . ($editing ? '/' . $item->id : '');
+?>
+
+<section class="organization container py-4">
+    <?php require __DIR__ . '/_nav.phtml'; ?>
+
+    <h2 class="h4"><?= $editing ? 'Editar registro' : 'Novo registro' ?></h2>
+
+    <form action="<?= e($action) ?>" method="post" id="organization-form" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+
+        <?php if ($editing): ?>
+            <input type="hidden" name="_method" value="PUT">
+        <?php endif; ?>
+
+        <div class="mb-3">
+            <label class="form-label" for="item-name">Nome</label>
+            <input
+                class="form-control"
+                id="item-name"
+                name="name"
+                maxlength="100"
+                value="<?= e($item->name) ?>"
+                required
+            >
+            <p class="text-danger mb-0" data-error="name"><?= e($item->errors('name')) ?></p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="item-color">Cor (opcional)</label>
+            <input
+                class="form-control"
+                id="item-color"
+                name="color"
+                maxlength="9"
+                placeholder="#507CF3"
+                value="<?= e($item->color) ?>"
+            >
+            <p class="text-danger mb-0" data-error="color"><?= e($item->errors('color')) ?></p>
+        </div>
+
+        <?php if ($item instanceof \App\Models\Folder): ?>
+            <div class="mb-3">
+                <label class="form-label" for="item-parent">Dentro da pasta</label>
+
+                <select class="form-select" id="item-parent" name="parent_id">
+                    <option value="">Nenhuma — pasta principal</option>
+
+                    <?php foreach ($parents as $option): ?>
+                        <?php if ($option->id !== $item->id): ?>
+                            <option
+                                value="<?= e($option->id) ?>"
+                                <?= $item->parent_id === $option->id ? 'selected' : '' ?>
+                            >
+                                <?= e($option->name) ?> (#<?= e($option->id) ?>)
+                            </option>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </select>
+
+                <p class="text-danger mb-0" data-error="parent_id"><?= e($item->errors('parent_id')) ?></p>
+            </div>
+        <?php endif; ?>
+
+        <button class="btn btn-primary" type="submit">Salvar</button>
+        <a class="btn btn-outline-secondary" href="/<?= e($resource) ?>">Cancelar</a>
+    </form>
+</section>

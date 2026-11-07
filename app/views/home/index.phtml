@@ -65,6 +65,16 @@
                     Home
                 </a>
 
+                <a href="/folders" class="nav-link">
+                <i class="bi bi-folder" aria-hidden="true"></i>
+                    Pastas
+                </a>
+
+                <a href="/tags" class="nav-link">
+                <i class="bi bi-tags" aria-hidden="true"></i>
+                    Tags
+                </a>
+
                 <a href="#links-title" class="nav-link" id="menu-links">
                 <i class="bi bi-link-45deg" aria-hidden="true"></i>
                     Links
@@ -165,8 +175,8 @@
                     <div class="mylink-stat-icon">
                         <i class="bi bi-folder" aria-hidden="true"></i>
                     </div>
-                    <p class="small text-secondary mb-1">Pastas</p>
-                    <p class="h2 mb-0">0</p>
+                    <p class="small text-secondary mb-1">Pastas e subpastas</p>
+                    <p class="h2 mb-0"><?= e($folderCount) ?></p>
                 </div>
             </div>
 
@@ -195,15 +205,20 @@
         <section class="mylink-card p-4 mb-4" aria-labelledby="folders-title">
             <h2 id="folders-title" class="h5 fw-semibold">Suas pastas</h2>
 
-            <div class="d-flex align-items-center gap-3 mt-3">
-                <i class="bi bi-folder-fill fs-1 text-primary"
-                   aria-hidden="true"></i>
-
-                <p class="small text-secondary mb-0">
-                    Nenhuma pasta por enquanto.
-                    Em breve, você poderá organizar seus links por assunto.
-                </p>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <?php foreach ($rootFolders as $folder): ?>
+                    <a class="btn btn-outline-primary" href="/folders?parent_id=<?= e($folder->id) ?>">
+                        <?= e($folder->name) ?>
+                    </a>
+                <?php endforeach; ?>
             </div>
+
+            <?php if ($rootFolders === []): ?>
+                <p class="text-secondary mt-3">Nenhuma pasta principal por enquanto.</p>
+            <?php endif; ?>
+
+            <a href="/folders" class="btn btn-primary mt-3">Gerenciar pastas</a>
+            <a href="/tags" class="btn btn-outline-primary mt-3">Gerenciar tags</a>
         </section>
 
         <!-- Links -->

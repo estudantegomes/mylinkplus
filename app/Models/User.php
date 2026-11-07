@@ -26,10 +26,28 @@ class User extends Model
         Validations::notEmpty('name', $this);
         Validations::notEmpty('email', $this);
 
+        if ($this->name !== null && $this->name !== '') {
+            if (trim($this->name) === '' || preg_match('/\A.{1,255}\z/us', $this->name) !== 1) {
+                $this->addError('name', 'Informe um nome com 1 a 255 caracteres.');
+            }
+        }
+
+        if ($this->email !== null && $this->email !== '') {
+            if (!filter_var($this->email, FILTER_VALIDATE_EMAIL) || strlen($this->email) > 255) {
+                $this->addError('email', 'Informe um e-mail válido com até 255 caracteres.');
+            }
+        }
+
         Validations::uniqueness('email', $this);
 
         if ($this->newRecord()) {
             Validations::passwordConfirmation($this);
+
+            if ($this->password === null || $this->password === '') {
+                $this->addError('password', 'Informe uma senha.');
+            } elseif (strlen($this->password) > 72 || str_contains($this->password, "\0")) {
+                $this->addError('password', 'A senha deve ter até 72 bytes e não pode conter caracteres nulos.');
+            }
         }
     }
 
@@ -54,7 +72,8 @@ class User extends Model
         if (
             $property === 'password' &&
             $this->newRecord() &&
-            $value !== null && $value !== ''
+            is_string($value) && $value !== '' &&
+            strlen($value) <= 72 && !str_contains($value, "\0")
         ) {
             $this->password_hash = password_hash($value, PASSWORD_DEFAULT);
         }

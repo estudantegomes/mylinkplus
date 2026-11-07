@@ -7,6 +7,7 @@ use Core\Http\Controllers\Controller;
 use Core\Http\Request;
 use Lib\Authentication\Auth;
 use Lib\FlashMessage;
+use App\Models\Folder;
 
 class HomeController extends Controller
 {
@@ -70,10 +71,21 @@ class HomeController extends Controller
 
     public function index(): void
     {
-        //middleware verifica a autenticação
+        $user = $this->currentUser();
+
+        if ($user === null) {
+            $this->redirectTo('/login');
+            return;
+        }
+
+        $folders = Folder::where(['user_id' => $user->id]);
+        $folderCount = count($folders);
+
+        $rootFolders = array_slice(array_values(array_filter($folders, fn($folder) => $folder->parent_id === null)), 0, 5);
+
         $title = 'Home | MyLink+';
 
-        $this->render('home/index', compact('title'));
+        $this->render('home/index', compact('title', 'folderCount', 'rootFolders'));
     }
 
     public function logout(Request $request): void

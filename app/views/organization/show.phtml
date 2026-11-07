@@ -1,0 +1,29 @@
+<section class="organization container py-4">
+    <?php require __DIR__ . '/_nav.phtml'; ?>
+
+    <h2 class="h4" id="item-title"><?= e($item->name) ?></h2>
+    <p>Cor: <?= e($item->color ?? 'Padrão') ?></p>
+
+    <?php if ($item instanceof \App\Models\Folder): ?>
+        <p>
+            <a href="/folders?parent_id=<?= e($item->id) ?>">Ver subpastas</a> ·
+            <a href="/folders/new?parent_id=<?= e($item->id) ?>">Criar subpasta</a>
+        </p>
+    <?php endif; ?>
+
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-primary" href="/<?= e($resource) ?>/<?= e($item->id) ?>/edit">Editar</a>
+        <a class="btn btn-outline-secondary" href="/<?= e($resource) ?>">Voltar à lista</a>
+
+        <form
+            action="/<?= e($resource) ?>/<?= e($item->id) ?>"
+            method="post"
+            onsubmit="return confirm('Excluir este registro?')"
+        >
+            <input type="hidden" name="_method" value="DELETE">
+            <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+
+            <button class="btn btn-outline-danger" type="submit">Excluir</button>
+        </form>
+    </div>
+</section>

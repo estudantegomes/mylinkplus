@@ -1,0 +1,26 @@
+<style>
+    .organization .btn {
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .organization .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 10px #0002;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .organization .btn { transition: none; }
+        .organization .btn:hover { transform: none; }
+    }
+</style>
+
+<nav class="d-flex flex-wrap align-items-center gap-2 mb-4" aria-label="Menu MyLink+">
+    <a class="btn btn-outline-primary" href="/home">Home</a>
+    <a class="btn btn-outline-primary" href="/folders">Pastas</a>
+    <a class="btn btn-outline-primary" href="/tags">Tags</a>
+
+    <form action="/logout" method="post" class="ms-auto mb-0">
+        <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+        <button class="btn btn-outline-danger" type="submit">Sair</button>
+    </form>
+</nav>

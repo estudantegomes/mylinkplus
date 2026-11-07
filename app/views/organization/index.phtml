@@ -1,0 +1,85 @@
+<?php
+$base = '/' . $resource;
+$query = $parent === null ? [] : ['parent_id' => $parent->id];
+$suffix = $query === [] ? '' : '?' . http_build_query($query);
+$pageUrl = static fn(int $page): string => $base . '?' . http_build_query(array_merge($query, ['page' => $page]));
+?>
+
+<section class="organization container py-4">
+    <?php require __DIR__ . '/_nav.phtml'; ?>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="h4 mb-0">
+            <?= $parent === null ? e($label) : 'Subpastas de ' . e($parent->name) ?>
+        </h2>
+
+        <a class="btn btn-primary" href="<?= e($base . '/new' . $suffix) ?>">Novo registro</a>
+    </div>
+
+    <?php if ($parent !== null): ?>
+        <p>
+            <a href="/folders">Pastas principais</a> ·
+            <a href="/folders/<?= e($parent->id) ?>">Detalhes desta pasta</a>
+        </p>
+    <?php endif; ?>
+
+    <div class="table-responsive">
+        <table class="table align-middle" id="organization-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Cor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <?php foreach ($paginator->registers() as $item): ?>
+                    <tr>
+                        <td>
+                            <?php if ($resource === 'folders'): ?>
+                                <a href="/folders?parent_id=<?= e($item->id) ?>">
+                                    <?= e($item->name) ?>
+                                </a>
+                            <?php else: ?>
+                                <?= e($item->name) ?>
+                            <?php endif; ?>
+                        </td>
+
+                        <td><?= e($item->color ?? 'Padrão') ?></td>
+
+                        <td class="d-flex flex-wrap gap-2">
+                            <a class="btn btn-sm btn-outline-primary" href="<?= e($base . '/' . $item->id) ?>">
+                                Detalhes
+                            </a>
+
+                            <a class="btn btn-sm btn-outline-secondary" href="<?= e($base . '/' . $item->id . '/edit') ?>">
+                                Editar
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <p><?= e($paginator->entriesInfo()) ?></p>
+
+    <nav class="d-flex align-items-center gap-3" aria-label="Paginação">
+        <?php if ($paginator->hasPreviousPage()): ?>
+            <a class="btn btn-outline-primary" href="<?= e($pageUrl($paginator->previousPage())) ?>">
+                Anterior
+            </a>
+        <?php endif; ?>
+
+        <span>
+            Página <?= e($paginator->getPage()) ?> de <?= e(max(1, $paginator->totalOfPages())) ?>
+        </span>
+
+        <?php if ($paginator->hasNextPage()): ?>
+            <a class="btn btn-outline-primary" href="<?= e($pageUrl($paginator->nextPage())) ?>">
+                Próxima
+            </a>
+        <?php endif; ?>
+    </nav>
+</section>
