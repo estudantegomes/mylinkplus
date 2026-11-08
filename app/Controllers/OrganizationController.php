@@ -111,8 +111,9 @@ abstract class OrganizationController extends Controller
 
     private function owned(mixed $id): OrganizationItem
     {
-        $id = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-        $item = $id === false ? null : $this->model::findBy(['id' => $id, 'user_id' => $this->userId()]);
+        $userId = $this->userId();
+        $id = OrganizationItem::parseId($id);
+        $item = $id === null ? null : $this->model::findBy(['id' => $id, 'user_id' => $userId]);
 
         if ($item === null) {
             throw new HTTPException('Registro nao encontrado.', 404);
@@ -131,7 +132,7 @@ abstract class OrganizationController extends Controller
         if ($item instanceof Folder) {
             $parent = $request->getParam('parent_id');
             $item->parent_id = $parent === null || $parent === '' ? null
-                : (filter_var($parent, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: -1);
+                : (OrganizationItem::parseId($parent) ?? -1);
         }
     }
 

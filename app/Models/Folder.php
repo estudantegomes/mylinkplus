@@ -15,24 +15,39 @@ class Folder extends OrganizationItem
     {
         parent::validates();
 
+        $ownerId = self::parseId($this->user_id);
+
+        if ($ownerId === null) {
+            $this->addError('user_id', 'Usuário inválido.');
+            return;
+        }
+
         $parentId = $this->parent_id;
+
+        if ($parentId === null) {
+            return;
+        }
+
+        $parentId = self::parseId($parentId);
+
+        if ($parentId === null) {
+            $this->addError('parent_id', 'Selecione uma pasta válida.');
+            return;
+        }
+
+        $this->parent_id = $parentId;
         $visited = [];
 
         while ($parentId !== null) {
-            if ($parentId < 1) {
-                $this->addError('parent_id', 'Selecione uma pasta válida.');
-                return;
-            }
-
             if ($parentId === $this->id || isset($visited[$parentId])) {
                 $this->addError('parent_id', 'Essa mudança criaria um ciclo entre as pastas.');
                 return;
             }
 
-            $parent = self::findBy(['id' => $parentId, 'user_id' => $this->user_id]);
+            $parent = self::findBy(['id' => $parentId, 'user_id' => $ownerId]);
 
             if ($parent === null) {
-                $this->addError('parent_id', 'A pasta deve pertencer à sua conta.');
+                $this->addError('parent_id', 'A pasta pai não existe ou não está disponível para sua conta.');
                 return;
             }
 

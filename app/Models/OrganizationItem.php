@@ -11,6 +11,21 @@ use Core\Database\ActiveRecord\Model;
  */
 abstract class OrganizationItem extends Model
 {
+    public static function parseId(mixed $value): ?int
+    {
+        if (!is_int($value) && !is_string($value)) {
+            return null;
+        }
+
+        // Os identificadores de pastas e tags são INT no PostgreSQL.
+        $id = filter_var($value, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => 2147483647],
+        ]);
+
+
+        return $id === false ? null : $id;
+    }
+
     public function validates(): void
     {
         if (trim($this->name ?? '') === '' || preg_match('/\A.{1,100}\z/us', $this->name ?? '') !== 1) {
