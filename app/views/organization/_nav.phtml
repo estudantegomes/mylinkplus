@@ -1,0 +1,19 @@
+<header class="org-topbar">
+    <div class="org-shell org-topbar-inner">
+        <a class="org-brand" href="/home" aria-label="MyLink+ — página inicial">
+            <span class="org-brand-mark"><?= $icon('link') ?></span>
+            <span><span class="org-brand-accent">my</span>link<span class="org-brand-accent">+</span></span>
+        </a>
+
+        <nav class="org-tabs" aria-label="Organização">
+            <a href="/folders"<?= $isFolder ? ' aria-current="location"' : '' ?>>
+                <?= $icon('folder') ?> Pastas
+            </a>
+            <a href="/tags"<?= !$isFolder ? ' aria-current="location"' : '' ?>>
+                <?= $icon('tag') ?> Tags
+            </a>
+        </nav>
+
+        <a class="org-btn org-home-link" href="/home"><?= $icon('back') ?> Voltar à home</a>
+    </div>
+</header>

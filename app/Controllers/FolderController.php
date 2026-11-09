@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Folder;
+<<<<<<< HEAD
 use Core\Database\Database;
 use Core\Http\Controllers\Controller;
 use Core\Http\Request;
@@ -101,4 +102,12 @@ class FolderController extends Controller
         echo json_encode($data);
         exit;
     }
+=======
+
+class FolderController extends OrganizationController
+{
+    protected string $model = Folder::class;
+    protected string $resource = 'folders';
+    protected string $label = 'Pastas';
+>>>>>>> backup/galeria-imagens-1xn
 }

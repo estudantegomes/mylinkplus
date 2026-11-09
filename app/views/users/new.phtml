@@ -1,0 +1,66 @@
+<section class="container py-5" style="max-width: 560px">
+    <h2 class="h4 mb-4">Criar conta no MyLink+</h2>
+
+    <form action="/users" method="post" id="registration-form" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+
+        <div class="mb-3">
+            <label class="form-label" for="register-name">Nome</label>
+            <input
+                class="form-control"
+                id="register-name"
+                name="name"
+                maxlength="255"
+                autocomplete="name"
+                value="<?= e($user->name) ?>"
+                required
+            >
+            <p class="text-danger mb-0" data-error="name"><?= e($user->errors('name')) ?></p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="register-email">E-mail</label>
+            <input
+                class="form-control"
+                id="register-email"
+                name="email"
+                type="email"
+                maxlength="255"
+                autocomplete="email"
+                value="<?= e($user->email) ?>"
+                required
+            >
+            <p class="text-danger mb-0" data-error="email"><?= e($user->errors('email')) ?></p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="register-password">Senha</label>
+            <input
+                class="form-control"
+                id="register-password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                minlength="8"
+                required
+            >
+            <p class="form-text">Use pelo menos 8 caracteres; o limite é de 72 bytes.</p>
+            <p class="text-danger mb-0" data-error="password"><?= e($user->errors('password')) ?></p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="register-confirmation">Confirmar senha</label>
+            <input
+                class="form-control"
+                id="register-confirmation"
+                name="password_confirmation"
+                type="password"
+                autocomplete="new-password"
+                required
+            >
+        </div>
+
+        <button class="btn btn-primary" type="submit">Criar conta</button>
+        <a class="btn btn-outline-secondary" href="/login">Já tenho conta</a>
+    </form>
+</section>

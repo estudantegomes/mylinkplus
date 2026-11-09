@@ -6,6 +6,7 @@ use Core\Database\Database;
 use Lib\Paginator;
 use Lib\StringUtils;
 use PDO;
+use PDOStatement;
 use ReflectionMethod;
 
 /**
@@ -151,7 +152,7 @@ abstract class Model
 
                 $stmt = $pdo->prepare($sql);
                 foreach (static::$columns as $column) {
-                    $stmt->bindValue($column, $this->$column);
+                    self::bindAttribute($stmt, $column, $this->$column);
                 }
 
                 $stmt->execute();
@@ -174,7 +175,7 @@ abstract class Model
                 $stmt->bindValue(':id', $this->id);
 
                 foreach (static::$columns as $column) {
-                    $stmt->bindValue($column, $this->$column);
+                    self::bindAttribute($stmt, $column, $this->$column);
                 }
 
                 $stmt->execute();
@@ -205,7 +206,7 @@ abstract class Model
         $stmt->bindValue(':id', $this->id);
 
         foreach ($data as $column => $value) {
-            $stmt->bindValue($column, $value);
+            self::bindAttribute($stmt, $column, $value);
             $this->$column = $value;
         }
 
@@ -317,7 +318,7 @@ abstract class Model
         $stmt = $pdo->prepare($sql);
 
         foreach ($conditions as $column => $value) {
-            $stmt->bindValue($column, $value);
+            self::bindAttribute($stmt, $column, $value);
         }
 
         $stmt->execute();
@@ -349,6 +350,18 @@ abstract class Model
     {
         $resp = self::where($conditions);
         return !empty($resp);
+    }
+
+    private static function bindAttribute(PDOStatement $statement, string $name, mixed $value): void
+    {
+        $type = match (true) {
+            $value === null => PDO::PARAM_NULL,
+            is_bool($value) => PDO::PARAM_BOOL,
+            is_int($value) => PDO::PARAM_INT,
+            default => PDO::PARAM_STR,
+        };
+
+        $statement->bindValue($name, $value, $type);
     }
 
     /* ------------------- RELATIONSHIPS METHODS ------------------- */

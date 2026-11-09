@@ -1,0 +1,106 @@
+<?php
+$editing = !$item->newRecord();
+$action = $base . ($editing ? '/' . $item->id : '');
+$parentId = $isFolder ? $item->parent_id : null;
+$formTitle = $editing ? 'Editar ' . $kind : ($parentId ? 'Nova subpasta' : 'Nova ' . $kind);
+$color = $validColor($item->color);
+$choices = $palette;
+if (!isset($choices[$color])) {
+    $choices[$color] = 'Cor atual';
+}
+
+$nameError = $item->errors('name');
+$colorError = $item->errors('color');
+$parentError = $item->errors('parent_id');
+$listUrl = $base;
+if ($isFolder) {
+    foreach ($parents as $option) {
+        if ($option->id === $parentId) {
+            $listUrl = '/folders?parent_id=' . $parentId;
+            break;
+        }
+    }
+}
+?>
+
+<div class="org-form-wrap">
+    <nav class="org-crumbs" aria-label="Localização">
+        <a href="<?= e($listUrl) ?>"><?= e($label) ?></a>
+        <?= $icon('next') ?>
+        <span aria-current="page"><?= e($formTitle) ?></span>
+    </nav>
+
+    <form class="org-panel org-form" action="<?= e($action) ?>" method="post" id="organization-form" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+        <?php if ($editing): ?>
+            <input type="hidden" name="_method" value="PUT">
+        <?php endif; ?>
+
+        <header class="org-form-heading">
+            <span class="org-emblem"><?= $icon($sectionIcon) ?></span>
+            <div>
+                <h1><?= e($formTitle) ?></h1>
+                <p>Dê um nome e escolha uma cor para identificar sua <?= e($kind) ?>.</p>
+            </div>
+        </header>
+
+        <div class="org-field">
+            <label for="item-name">Nome</label>
+            <input
+                class="org-input"
+                id="item-name"
+                name="name"
+                maxlength="100"
+                placeholder="<?= $isFolder ? 'Ex.: Faculdade' : 'Ex.: Para ler' ?>"
+                value="<?= e($item->name) ?>"
+                aria-describedby="item-name-error"
+                <?= $nameError ? 'aria-invalid="true"' : '' ?>
+                required
+            >
+            <p class="org-error" id="item-name-error" data-error="name"><?= e($nameError) ?></p>
+        </div>
+
+        <?php if ($isFolder): ?>
+            <div class="org-field">
+                <label for="item-parent">Dentro da pasta <span class="org-optional">Opcional</span></label>
+                <select
+                    class="org-input"
+                    id="item-parent"
+                    name="parent_id"
+                    aria-describedby="item-parent-error"
+                    <?= $parentError ? 'aria-invalid="true"' : '' ?>
+                >
+                    <option value="">Nenhuma — pasta principal</option>
+                    <?php foreach ($parents as $option): ?>
+                        <?php if ($option->id !== $item->id): ?>
+                            <option value="<?= e($option->id) ?>" <?= $parentId === $option->id ? 'selected' : '' ?>>
+                                <?= e($option->name) ?> (#<?= e($option->id) ?>)
+                            </option>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </select>
+                <p class="org-error" id="item-parent-error" data-error="parent_id"><?= e($parentError) ?></p>
+            </div>
+        <?php endif; ?>
+
+        <fieldset class="org-field org-color-field" aria-describedby="org-color-help item-color-error">
+            <legend>Cor <span class="org-optional">Opcional</span></legend>
+            <p class="org-field-hint" id="org-color-help">Escolha uma opção da paleta.</p>
+            <div class="org-palette">
+                <?php foreach ($choices as $value => $name): ?>
+                    <label class="org-color-option" style="--item-color: <?= e($swatch($value)) ?>">
+                        <input type="radio" name="color" value="<?= e($value) ?>" <?= $color === $value ? 'checked' : '' ?>>
+                        <span class="org-swatch" aria-hidden="true"></span>
+                        <span><?= e($name) ?></span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+            <p class="org-error" id="item-color-error" data-error="color"><?= e($colorError) ?></p>
+        </fieldset>
+
+        <footer class="org-panel-footer">
+            <a class="org-btn" href="<?= e($listUrl) ?>">Cancelar</a>
+            <button class="org-btn org-btn-primary" type="submit">Salvar</button>
+        </footer>
+    </form>
+</div>

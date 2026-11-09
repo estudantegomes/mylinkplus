@@ -1,0 +1,91 @@
+<?php
+$query = $parent === null ? [] : ['parent_id' => $parent->id];
+$newUrl = $base . '/new' . ($query ? '?' . http_build_query($query) : '');
+$pageUrl = static fn(int $page): string => $base . '?' . http_build_query($query + ['page' => $page]);
+$heading = $parent === null ? $label : 'Subpastas de ' . $parent->name;
+$newLabel = $parent === null ? 'Nova ' . $kind : 'Nova subpasta';
+$collectionLabel = $isFolder ? ($parent === null ? 'Pastas principais' : 'Subpastas') : 'Suas tags';
+$emptyTitle = $parent !== null ? 'Nenhuma subpasta ainda' : 'Nenhuma ' . $kind . ' criada';
+$items = $paginator->registers();
+$count = $paginator->totalOfRegisters();
+?>
+
+<?php if ($parent !== null): ?>
+    <nav class="org-crumbs" aria-label="Localização">
+        <a href="/folders">Pastas</a>
+        <?= $icon('next') ?>
+        <a href="/folders/<?= e($parent->id) ?>"><?= e($parent->name) ?></a>
+        <?= $icon('next') ?>
+        <span aria-current="page">Subpastas</span>
+    </nav>
+<?php endif; ?>
+
+<header class="org-hero">
+    <span class="org-emblem org-emblem-large"><?= $icon($sectionIcon) ?></span>
+    <div class="org-hero-text">
+        <p class="org-kicker">Meu espaço</p>
+        <h1><?= e($heading) ?></h1>
+        <p><?= $isFolder ? 'Organize seus links em pastas e subpastas.' : 'Crie etiquetas para seus assuntos e categorias.' ?></p>
+    </div>
+    <a class="org-btn org-btn-primary" href="<?= e($newUrl) ?>"><?= $icon('plus') ?> <?= e($newLabel) ?></a>
+</header>
+
+<section class="org-collection" aria-labelledby="org-collection-title">
+    <div class="org-section-heading">
+        <h2 id="org-collection-title"><?= e($collectionLabel) ?></h2>
+        <span class="org-count"><?= e($count) ?> <?= $count === 1 ? 'item' : 'itens' ?></span>
+    </div>
+
+    <div id="organization-table" class="org-grid">
+        <?php foreach ($items as $item): ?>
+            <?php
+            $itemUrl = $base . '/' . $item->id;
+            $openUrl = $isFolder ? '/folders?parent_id=' . $item->id : $itemUrl;
+            $color = $validColor($item->color);
+            ?>
+            <article class="org-card" style="--item-color: <?= e($swatch($color)) ?>">
+                <div class="org-card-main">
+                    <span class="org-emblem org-emblem-item"><?= $icon($sectionIcon) ?></span>
+                    <div class="org-card-copy">
+                        <h3><a href="<?= e($openUrl) ?>"><?= e($item->name) ?></a></h3>
+                        <span class="org-color-chip">
+                            <span class="org-swatch" aria-hidden="true"></span><?= e($colorName($color)) ?>
+                        </span>
+                    </div>
+                </div>
+                <div class="org-card-actions">
+                    <a class="org-btn org-btn-small" href="<?= e($itemUrl) ?>">Detalhes</a>
+                    <a class="org-btn org-btn-small" href="<?= e($itemUrl . '/edit') ?>"><?= $icon('edit') ?> Editar</a>
+                </div>
+            </article>
+        <?php endforeach; ?>
+
+        <?php if ($items === []): ?>
+            <div class="org-empty">
+                <span class="org-emblem"><?= $icon($sectionIcon) ?></span>
+                <h3><?= e($emptyTitle) ?></h3>
+                <p>Crie <?= $parent === null ? 'sua primeira ' . e($kind) : 'uma subpasta' ?> para começar.</p>
+                <a class="org-btn" href="<?= e($newUrl) ?>"><?= $icon('plus') ?> <?= e($newLabel) ?></a>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($count > 0): ?>
+        <div class="org-list-footer">
+            <p><?= e($paginator->entriesInfo()) ?></p>
+            <?php if ($paginator->totalOfPages() > 1): ?>
+                <nav class="org-pager" aria-label="Paginação">
+                    <?php if ($paginator->hasPreviousPage()): ?>
+                        <a class="org-btn org-btn-small" href="<?= e($pageUrl($paginator->previousPage())) ?>">Anterior</a>
+                    <?php endif; ?>
+                    <span>Página <?= e($paginator->getPage()) ?> de <?= e($paginator->totalOfPages()) ?></span>
+                    <?php if ($paginator->hasNextPage()): ?>
+                        <a class="org-btn org-btn-small" href="<?= e($pageUrl($paginator->nextPage())) ?>">
+                            Próxima <?= $icon('next') ?>
+                        </a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+</section>

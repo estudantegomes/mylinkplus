@@ -22,10 +22,14 @@ services:
     volumes:
       - .:/var/www
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - profile_data:/var/lib/mylink/profile
+    environment:
+      PROFILE_STORAGE_PATH: /var/lib/mylink/profile
     networks:
       - app-network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine
@@ -35,6 +39,12 @@ services:
       POSTGRES_DB: "$DB_DATABASE"
       POSTGRES_USER: "$DB_USERNAME"
       POSTGRES_PASSWORD: "$DB_PASSWORD"
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
     volumes:
       - dbdata:/var/lib/postgresql/data
     networks:
@@ -56,13 +66,17 @@ services:
     volumes:
       - .:/var/www
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - profile_test_data:/var/lib/mylink/profile-testing
     networks:
       - app-network
     depends_on:
-      - db
-      - selenium
+      db:
+        condition: service_healthy
+      selenium:
+        condition: service_started
     environment:
       APP_ENV: testing
+      PROFILE_TEST_STORAGE_PATH: /var/lib/mylink/profile-testing
       DB_HOST: db
       DB_PORT: 5432
       DB_DATABASE: encurtador_test
@@ -74,3 +88,5 @@ networks:
 
 volumes:
   dbdata:
+  profile_data:
+  profile_test_data:

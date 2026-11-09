@@ -21,3 +21,10 @@ if (!function_exists('route')) {
         return Router::getInstance()->getRoutePathByName($name, $params);
     }
 }
+
+if (!function_exists('e')) {
+    function e(mixed $value): string
+    {
+        return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+}

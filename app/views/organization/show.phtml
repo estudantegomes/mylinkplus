@@ -1,0 +1,51 @@
+<?php
+$itemUrl = $base . '/' . $item->id;
+$parentId = $isFolder ? $item->parent_id : null;
+$listUrl = $base . ($parentId === null ? '' : '?parent_id=' . $parentId);
+$color = $validColor($item->color);
+$typeLabel = $isFolder ? ($parentId === null ? 'Pasta principal' : 'Subpasta') : 'Tag';
+?>
+
+<nav class="org-crumbs" aria-label="Localização">
+    <a href="<?= e($listUrl) ?>"><?= e($label) ?></a>
+    <?= $icon('next') ?>
+    <span aria-current="page">Detalhes</span>
+</nav>
+
+<article class="org-panel org-detail" style="--item-color: <?= e($swatch($color)) ?>">
+    <header class="org-detail-heading">
+        <span class="org-emblem org-emblem-large org-emblem-item"><?= $icon($sectionIcon) ?></span>
+        <div class="org-detail-copy">
+            <p class="org-kicker"><?= e($typeLabel) ?></p>
+            <h1 id="item-title"><?= e($item->name) ?></h1>
+            <span class="org-color-chip">
+                <span class="org-swatch" aria-hidden="true"></span>Cor: <?= e($colorName($color)) ?>
+            </span>
+        </div>
+        <a class="org-btn org-btn-primary" href="<?= e($itemUrl . '/edit') ?>"><?= $icon('edit') ?> Editar</a>
+    </header>
+
+    <?php if ($isFolder): ?>
+        <section class="org-detail-subfolders" aria-labelledby="org-subfolders-title">
+            <div>
+                <h2 id="org-subfolders-title">Subpastas</h2>
+                <p>Abra as subpastas desta pasta ou crie uma nova.</p>
+            </div>
+            <div class="org-action-group">
+                <a class="org-btn" href="/folders?parent_id=<?= e($item->id) ?>">Ver subpastas</a>
+                <a class="org-btn" href="/folders/new?parent_id=<?= e($item->id) ?>">
+                    <?= $icon('plus') ?> Criar subpasta
+                </a>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <footer class="org-panel-footer">
+        <a class="org-btn" href="<?= e($listUrl) ?>"><?= $icon('back') ?> Voltar à lista</a>
+        <form action="<?= e($itemUrl) ?>" method="post" onsubmit="return confirm('Excluir este registro?')">
+            <input type="hidden" name="_method" value="DELETE">
+            <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+            <button class="org-btn org-btn-danger" type="submit"><?= $icon('trash') ?> Excluir</button>
+        </form>
+    </footer>
+</article>

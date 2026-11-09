@@ -24,10 +24,15 @@ class ErrorsHandler
             ob_end_clean(); // Discard the buffered output
 
             if ($e instanceof HTTPException) {
-                header('HTTP/1.1 ' . $e->getStatusCode() . ' ' . $e->getMessage());
-            } else {
-                header('HTTP/1.1 500 Internal Server Error');
+                $status = $e->getStatusCode();
+                $message = htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+                http_response_code($status);
+                echo "<h1>{$status} {$message}</h1>";
+                return;
             }
+
+            http_response_code(500);
 
             echo <<<HTML
                 <h1>{$e->getMessage()}</h1>

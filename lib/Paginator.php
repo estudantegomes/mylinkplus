@@ -24,7 +24,13 @@ class Paginator
         private array $conditions = [],
         private ?string $route = null
     ) {
+        $this->page = max(1, $this->page);
+        $this->per_page = max(1, $this->per_page);
+
         $this->loadTotals();
+
+        $this->page = min($this->page, max(1, $this->totalOfPages));
+
         $this->loadRegisters();
     }
 
@@ -80,8 +86,13 @@ class Paginator
 
     public function entriesInfo(): string
     {
+        if ($this->totalOfRegisters === 0) {
+            return 'Nenhum registro encontrado.';
+        }
+
         $totalVisualizedBegin = $this->offset + 1;
         $totalVisualizedEnd = $totalVisualizedBegin + $this->totalOfRegistersOfPage - 1;
+
         return "Mostrando {$totalVisualizedBegin} - {$totalVisualizedEnd} de {$this->totalOfRegisters}";
     }
 
@@ -110,8 +121,8 @@ class Paginator
         $this->bindConditions($stmt);
         $stmt->execute();
 
-        $this->totalOfRegisters = $stmt->fetchColumn();
-        $this->totalOfPages = ceil($this->totalOfRegisters / $this->per_page);
+        $this->totalOfRegisters = (int) $stmt->fetchColumn();
+        $this->totalOfPages = (int) ceil($this->totalOfRegisters / $this->per_page);
     }
 
     private function loadRegisters(): void
@@ -124,6 +135,7 @@ class Paginator
         $sql = <<<SQL
             SELECT id, {$attributes} FROM {$this->table}
             {$this->buildConditions()}
+            ORDER BY id ASC
             LIMIT :limit OFFSET :offset
         SQL;
 
@@ -151,7 +163,7 @@ class Paginator
         }
 
         $sqlConditions = array_map(function ($column) {
-            return "{$column} = :{$column}";
+            return $this->conditions[$column] === null ? "{$column} IS NULL" : "{$column} = :{$column}";
         }, array_keys($this->conditions));
 
         return ' WHERE ' . implode(' AND ', $sqlConditions);
@@ -164,7 +176,9 @@ class Paginator
         }
 
         foreach ($this->conditions as $column => $value) {
-            $stmt->bindValue($column, $value);
+            if ($value !== null) {
+                $stmt->bindValue($column, $value);
+            }
         }
     }
 }
