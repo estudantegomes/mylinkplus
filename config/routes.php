@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/' . $resource . '/{id}', [$controller, 'destroy'])->name($resource . '.destroy');
     }
 
+    //rotas administrativas
     Route::middleware('admin')->group(function () {
         Route::get('/admin', [AdminController::class, 'index'])->name('admin');
     });
