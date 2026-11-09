@@ -2,13 +2,11 @@
 
 use App\Controllers\AdminController;
 use App\Controllers\FolderController;
-<<<<<<< HEAD
-=======
+
 use App\Controllers\HomeController;
 use App\Controllers\ProfileController;
 use App\Controllers\RegistrationController;
 use App\Controllers\TagController;
->>>>>>> backup/galeria-imagens-1xn
 use Core\Router\Route;
 
 Route::get('/', [HomeController::class, 'login'])->name('root');
