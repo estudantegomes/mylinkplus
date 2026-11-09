@@ -1,0 +1,83 @@
+<div class="profile-heading">
+    <p class="profile-eyebrow">DO SEU JEITO</p>
+    <h1>Meu perfil</h1>
+    <p>Escolha a foto que representa você no MyLink+.</p>
+</div>
+
+<div class="profile-layout">
+    <section class="profile-card profile-summary" aria-labelledby="profile-name">
+        <div class="profile-current-avatar" id="current-avatar">
+            <?php if ($profilePhoto !== null): ?>
+                <img src="/profile/photos/<?= e($profilePhoto->id) ?>/image" alt="Foto de perfil atual" width="128" height="128">
+            <?php else: ?>
+                <span><?= e($user->profileInitials()) ?></span>
+            <?php endif; ?>
+        </div>
+        <h2 id="profile-name"><?= e($user->name) ?></h2>
+        <p class="profile-email"><?= e($user->email) ?></p>
+        <span class="profile-private-label">Sua galeria é privada</span>
+        <p class="profile-summary-note">Guarde suas fotos favoritas e escolha qual aparece na Home.</p>
+    </section>
+
+    <div>
+        <section class="profile-card profile-upload" aria-labelledby="upload-title">
+            <h2 id="upload-title">Adicionar uma foto</h2>
+            <p>PNG, JPEG ou WebP, até 2 MB. A nova foto será usada no seu perfil.</p>
+            <form id="profile-upload-form" action="/profile/photos" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+                <label for="profile-photo" class="form-label">Escolha uma imagem</label>
+                <input type="file" name="photo" id="profile-photo" accept="image/png,image/jpeg,image/webp"
+                    class="form-control<?= $error !== null ? ' is-invalid' : '' ?>" aria-describedby="photo-help photo-error">
+                <p id="photo-help" class="profile-help">Até 4 milhões de pixels e 4096 pixels por lado. SVG não é aceito.</p>
+                <p id="photo-error" data-error="photo" class="profile-error" role="alert"><?= e($error ?? '') ?></p>
+                <button type="submit" class="profile-button" <?= count($photos) >= 10 ? 'disabled' : '' ?>>Enviar foto</button>
+                <?php if (count($photos) >= 10): ?>
+                    <p class="profile-help">Sua galeria está cheia. Exclua uma foto para enviar outra.</p>
+                <?php endif; ?>
+            </form>
+        </section>
+
+        <section class="profile-gallery-section" aria-labelledby="gallery-title">
+            <div class="profile-gallery-heading">
+                <h2 id="gallery-title">Suas fotos</h2>
+                <span id="photo-count"><?= count($photos) ?> de 10 fotos</span>
+            </div>
+            <?php if (count($photos) === 0): ?>
+                <div class="profile-card profile-empty" id="profile-empty">
+                    <div aria-hidden="true" class="profile-empty-icon">＋</div>
+                    <h3>Sua primeira foto começa aqui</h3>
+                    <p>Envie uma imagem acima. Enquanto isso, suas iniciais aparecem no perfil.</p>
+                </div>
+            <?php else: ?>
+                <div class="profile-gallery" id="profile-gallery">
+                    <?php foreach ($photos as $photo): ?>
+                        <article class="profile-photo-card<?= $photo->is_current ? ' is-current' : '' ?>"
+                            data-photo-id="<?= e($photo->id) ?>" data-current="<?= $photo->is_current ? 'true' : 'false' ?>">
+                            <a href="/profile/photos/<?= e($photo->id) ?>/image" target="_blank" rel="noopener"
+                                class="profile-photo-preview" aria-label="Visualizar <?= e($photo->original_name) ?>">
+                                <img src="/profile/photos/<?= e($photo->id) ?>/image" alt="<?= e($photo->original_name) ?>"
+                                    loading="lazy" width="240" height="240">
+                            </a>
+                            <div class="profile-photo-info">
+                                <p class="profile-photo-name" title="<?= e($photo->original_name) ?>"><?= e($photo->original_name) ?></p>
+                                <?php if ($photo->is_current): ?>
+                                    <span class="profile-current-badge">✓ Foto atual</span>
+                                <?php else: ?>
+                                    <form action="/profile/photos/<?= e($photo->id) ?>/current" method="post">
+                                        <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+                                        <button type="submit" class="profile-select-button">Usar no perfil</button>
+                                    </form>
+                                <?php endif; ?>
+                                <form action="/profile/photos/<?= e($photo->id) ?>" method="post" class="profile-delete-form">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="hidden" name="csrf_token" value="<?= e(\Lib\Csrf::token()) ?>">
+                                    <button type="submit" class="profile-delete-button">Excluir foto</button>
+                                </form>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
+    </div>
+</div>

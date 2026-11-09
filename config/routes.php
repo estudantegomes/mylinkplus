@@ -3,6 +3,7 @@
 use App\Controllers\AdminController;
 use App\Controllers\FolderController;
 use App\Controllers\HomeController;
+use App\Controllers\ProfileController;
 use App\Controllers\RegistrationController;
 use App\Controllers\TagController;
 use Core\Router\Route;
@@ -17,6 +18,12 @@ Route::post('/users', [RegistrationController::class, 'create'])->name('users.cr
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::post('/profile/photos', [ProfileController::class, 'upload'])->name('profile.photos.upload');
+    Route::get('/profile/photos/{id}/image', [ProfileController::class, 'image'])->name('profile.photos.image');
+    Route::post('/profile/photos/{id}/current', [ProfileController::class, 'select'])->name('profile.photos.select');
+    Route::delete('/profile/photos/{id}', [ProfileController::class, 'destroy'])->name('profile.photos.destroy');
 
     foreach (['folders' => FolderController::class, 'tags' => TagController::class] as $resource => $controller) {
         Route::get('/' . $resource, [$controller, 'index'])->name($resource . '.index');

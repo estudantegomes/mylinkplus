@@ -1,4 +1,5 @@
 actor: AcceptanceTester
+path: Acceptance
 modules:
   enabled:
     - WebDriver:

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Lib\Validations;
 use Core\Database\ActiveRecord\Model;
+use Core\Database\ActiveRecord\HasMany;
 
 /**
  * @property int $id
@@ -82,5 +83,27 @@ class User extends Model
     public function isActive(): bool
     {
         return $this->is_active;
+    }
+
+    public function profilePhotos(): HasMany
+    {
+        return $this->hasMany(ProfilePhoto::class, 'user_id');
+    }
+
+    public function currentProfilePhoto(): ?ProfilePhoto
+    {
+        return ProfilePhoto::findBy(['user_id' => $this->id, 'is_current' => true]);
+    }
+
+    public function profileInitials(): string
+    {
+        $label = trim($this->name ?? '') ?: explode('@', $this->email ?? 'U')[0];
+        $words = preg_split('/\s+/u', $label, -1, PREG_SPLIT_NO_EMPTY) ?: ['U'];
+        $initials = mb_substr($words[0], 0, 1);
+        if (count($words) > 1) {
+            $initials .= mb_substr($words[count($words) - 1], 0, 1);
+        }
+
+        return mb_strtoupper($initials, 'UTF-8');
     }
 }

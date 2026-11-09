@@ -84,8 +84,9 @@ class HomeController extends Controller
         $rootFolders = array_slice(array_values(array_filter($folders, fn($folder) => $folder->parent_id === null)), 0, 5);
 
         $title = 'Home | MyLink+';
+        $profilePhoto = $user->currentProfilePhoto();
 
-        $this->render('home/index', compact('title', 'folderCount', 'rootFolders'));
+        $this->render('home/index', compact('title', 'folderCount', 'rootFolders', 'user', 'profilePhoto'));
     }
 
     public function logout(Request $request): void

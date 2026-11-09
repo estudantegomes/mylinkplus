@@ -1,0 +1,8 @@
+<a href="/profile" class="profile-avatar" id="<?= e($avatarMenuId ?? 'profile-menu') ?>"
+    aria-label="Abrir Meu perfil" title="Meu perfil">
+    <?php if ($profilePhoto !== null): ?>
+        <img src="/profile/photos/<?= e($profilePhoto->id) ?>/image" alt="Minha foto de perfil" width="46" height="46">
+    <?php else: ?>
+        <span aria-hidden="true"><?= e($user->profileInitials()) ?></span>
+    <?php endif; ?>
+</a>
